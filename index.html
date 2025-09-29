@@ -1,35 +1,343 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>نقطة بيع متجرك</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="index.css">
-    <style>
-      body {
-        font-family: 'Fira Code', monospace;
-      }
-    </style>
-  <script type="importmap">
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harir Restaurant Menu</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts (Lora for English) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      font-family: 'Lora', serif;
+    }
+    @keyframes modal-pop-in {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-modal-pop-in {
+      animation: modal-pop-in 0.3s ease-out forwards;
+    }
+  </style>
+<script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
-    "react/": "https://esm.sh/react@^19.1.1/",
-    "react": "https://esm.sh/react@^19.1.1",
-    "@google/genai": "https://esm.sh/@google/genai@^1.14.0",
-    "xlsx": "https://esm.sh/xlsx@^0.18.5"
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.20.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-gray-900 text-gray-200">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+<body class="bg-slate-900 text-white">
+  <div class="fixed inset-0 z-0">
+    <div id="bg-switch-1" class="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms] ease-in-out" style="filter: brightness(0.3);"></div>
+    <div id="bg-switch-2" class="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms] ease-in-out" style="filter: brightness(0.3);"></div>
+  </div>
+  
+  <main class="relative z-10 container mx-auto px-4 py-8">
+    <header class="text-center my-12">
+      <h1 class="text-5xl md:text-7xl font-bold text-amber-400">
+        Harir Restaurant
+      </h1>
+      <p class="text-gray-300 text-lg mt-4">The Authentic Taste of Aleppo... Masterfully Crafted</p>
+    </header>
+
+    <!-- Featured Dishes Section -->
+    <section id="featured-dishes" class="my-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-8 border-b-2 border-amber-400/50 pb-3 max-w-sm mx-auto">Chef's Most Famous Dishes</h2>
+        <div id="featured-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <!-- Featured dishes will be injected here -->
+        </div>
+    </section>
+
+    <section id="categories-section" class="sticky top-0 bg-slate-900/80 backdrop-blur-lg py-4 z-20 mb-8 rounded-2xl shadow-lg border-t border-white/10">
+      <div id="category-buttons" class="flex justify-center items-center gap-2 md:gap-4 flex-wrap">
+        <!-- Category buttons will be injected here by JavaScript -->
+      </div>
+    </section>
+
+    <section id="menu-list-container" class="flex flex-col gap-8">
+        <!-- Menu items and category headers will be injected here -->
+    </section>
+  </main>
+
+  <div id="item-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center z-50 p-4 hidden" role="dialog" aria-modal="true" aria-labelledby="modal-name">
+    <div class="relative bg-stone-900 border border-amber-500/30 text-white rounded-2xl shadow-2xl w-full max-w-lg mx-auto overflow-hidden animate-modal-pop-in">
+        <img id="modal-image" src="" alt="" class="w-full h-64 object-cover" />
+        <div class="p-6">
+            <h2 id="modal-name" class="text-3xl font-bold text-amber-400 mb-2"></h2>
+            <p id="modal-description" class="text-gray-300 mb-4"></p>
+            <div id="modal-prices" class="mt-6"></div>
+        </div>
+        <button id="modal-close" class="absolute top-4 right-4 bg-white/10 rounded-full p-2 text-white hover:bg-white/30 transition-colors" aria-label="Close">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
+  </div>
+
+  <footer class="relative z-10 mt-16 bg-slate-900/70 backdrop-blur-md py-12 border-t border-amber-500/20">
+    <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
+      <div>
+        <h3 class="text-2xl font-bold text-amber-400 mb-4">Contact Us</h3>
+        <p class="text-gray-300 mb-2"><strong>Harir Restaurant</strong></p>
+        <p class="text-gray-300 mb-2"><strong>Address:</strong> Arkan Plaza - Sheikh Zayed City.</p>
+        <p class="text-gray-300 mb-2"><strong>Phone:</strong> 01030566078</p>
+        <p class="text-gray-300"><strong>WhatsApp:</strong> 01118091234</p>
+      </div>
+      <div class="w-full h-64 md:h-auto bg-gray-700 rounded-lg overflow-hidden">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.737151368926!2d31.2334493151152!3d30.04442088188204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145840d654ea9521%3A0x2691b3558c433362!2sTahrir%20Square!5e0!3m2!1sen!2seg!4v1678886450123!5m2!1sen!2seg"
+          width="100%"
+          height="100%"
+          style="border:0;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Our Location"
+        ></iframe>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // --- Background Slideshow ---
+      const bgImages = [
+          'https://www2.0zz0.com/2025/09/25/01/756518510.jpg', // Umayyad Mosque
+          'https://www2.0zz0.com/2025/09/25/01/756518510.jpg', // Old Damascus street
+          'https://www2.0zz0.com/2025/09/25/01/756518510.jpg', // Aleppo Citadel
+          'https://www2.0zz0.com/2025/09/25/01/756518510.jpg', // Palmyra
+          'https://www2.0zz0.com/2025/09/25/01/756518510.jpg'  // Souq Al-Hamidiyya
+      ];
+      let currentBgIndex = 0;
+      const bgDiv1 = document.getElementById('bg-switch-1');
+      const bgDiv2 = document.getElementById('bg-switch-2');
+      const bgDivs = [bgDiv1, bgDiv2];
+      let activeDivIndex = 0;
+
+      function cycleBackground() {
+          currentBgIndex = (currentBgIndex + 1) % bgImages.length;
+          const inactiveDivIndex = 1 - activeDivIndex;
+          
+          bgDivs[inactiveDivIndex].style.backgroundImage = `url('${bgImages[currentBgIndex]}')`;
+          bgDivs[inactiveDivIndex].style.opacity = 1;
+          bgDivs[activeDivIndex].style.opacity = 0;
+          
+          activeDivIndex = inactiveDivIndex;
+      }
+
+      // Initial setup
+      bgDiv1.style.backgroundImage = `url('${bgImages[0]}')`;
+      bgDiv1.style.opacity = 1;
+      bgDiv2.style.opacity = 0;
+      setInterval(cycleBackground, 8000); // Change image every 8 seconds
+
+      const menuItems = [
+        // Appetizers
+        { id: 1, name: 'Hummus with Meat', description: 'Hummus with tahini topped with pieces of lamb and roasted pine nuts.', price: { 'Meal': 120 }, image: 'https://images.unsplash.com/photo-1582512423020-a72e35a5135c?q=80&w=1974&auto=format&fit=crop', category: 'Levantine Appetizers' },
+        { id: 2, name: 'Mixed Grill Plate', description: 'A generous assortment of our finest charcoal-grilled meats, including shish tawook and kebab.', price: { 'Plate': 150 }, image: 'https://www2.0zz0.com/2025/09/25/01/326315888.jpg', category: 'Main Courses' },
+        { id: 3, name: 'Tabbouleh', description: 'A refreshing salad of chopped parsley, mint, tomatoes, and bulgur, seasoned with olive oil and lemon.', price: { 'Serving': 80 }, image: 'https://images.unsplash.com/photo-1594041682984-7246f62b0a43?q=80&w=1974&auto=format&fit=crop', category: 'Levantine Appetizers' },
+        
+        // Grills
+        { id: 4, name: 'Shish Tawook', description: 'Skewers of chicken pieces marinated in yogurt and spices, grilled over charcoal.', price: { 'Meal': 180 }, image: 'https://images.unsplash.com/photo-1598514982901-ae62c08ae483?q=80&w=2070&auto=format&fit=crop', category: 'Charcoal Grills' },
+        { id: 5, name: 'Aleppo Kebab', description: 'Skewers of minced meat with authentic Aleppo spices and pepper, perfectly grilled.', price: { 'Meal': 190 }, image: 'https://www2.0zz0.com/2025/09/25/01/280323824.jpg', category: 'Charcoal Grills' },
+        { id: 6, name: 'Arayes', description: 'Arabic bread stuffed with seasoned minced meat and grilled on charcoal until crispy.', price: { 'Serving': 220 }, image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1971&auto=format&fit=crop', category: 'Charcoal Grills' },
+        
+        // Main Courses
+        { id: 7, name: 'Shakriya with Meat', description: 'Tender lamb pieces cooked in a cooked yogurt sauce (shami style) and served with white rice.', price: { 'Meal': 320 }, image: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070&auto=format&fit=crop', category: 'Main Courses' },
+        { id: 8, name: 'Manakeesh', description: 'A popular Levantine flatbread topped with various ingredients like thyme (za\'atar), cheese, or minced meat.', price: { 'Piece': 100 }, image: 'https://www2.0zz0.com/2025/09/25/01/382041625.jpg', category: 'Main Courses' },
+        
+        // Desserts
+        { id: 9, name: 'Kunafa', description: 'Rough kunafa with Akkawi cheese, baked in the oven, drizzled with syrup, and garnished with Aleppo pistachios.', price: { 'Piece': 90 }, image: 'https://www2.0zz0.com/2025/09/25/01/389026282.jpg', category: 'Delicious Desserts' },
+        { id: 10, name: 'Halawet El Jibn', description: 'Rolls of semolina and cheese dough, stuffed with fresh cream and decorated with lemon blossom and pistachios.', price: { 'Plate': 110 }, image: 'https://images.unsplash.com/photo-1583304492418-d71c1753066b?q=80&w=1964&auto=format&fit=crop', category: 'Delicious Desserts' }
+      ];
+
+      // --- Featured Dishes Logic ---
+      const featuredDishes = [menuItems[4], menuItems[1], menuItems[9]]; // Kebab, Mixed Grill, Kunafa
+      const featuredGrid = document.getElementById('featured-grid');
+
+      function createFeaturedCard(item) {
+          const card = document.createElement('div');
+          card.className = "bg-stone-800/50 border border-amber-500/20 backdrop-blur-md rounded-2xl overflow-hidden shadow-lg transform hover:-translate-y-2 transition-transform duration-300 ease-in-out cursor-pointer group relative";
+          card.setAttribute('aria-label', `View details for ${item.name}`);
+          
+          let startingPrice;
+          if (typeof item.price === 'object') {
+              startingPrice = Object.values(item.price)[0];
+          } else {
+              startingPrice = item.price;
+          }
+
+          card.innerHTML = `
+              <div class="absolute top-3 left-3 bg-amber-500 text-stone-900 text-sm font-bold px-3 py-1 rounded-full z-10">Featured</div>
+              <img src="${item.image}" alt="${item.name}" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-300" />
+              <div class="p-5 text-center">
+                <h3 class="text-xl font-bold truncate text-white">${item.name}</h3>
+                <p class="text-md font-semibold text-amber-400 mt-2">EGP ${startingPrice}</p>
+              </div>
+          `;
+          card.addEventListener('click', () => openModal(item));
+          return card;
+      }
+      
+      function renderFeaturedDishes() {
+          if (!featuredGrid) return;
+          featuredGrid.innerHTML = '';
+          featuredDishes.forEach(item => {
+              featuredGrid.appendChild(createFeaturedCard(item));
+          });
+      }
+
+      // --- Menu Logic ---
+      const menuListContainer = document.getElementById('menu-list-container');
+      const categoryButtonsContainer = document.getElementById('category-buttons');
+      const categoriesSection = document.getElementById('categories-section');
+      
+      const modal = document.getElementById('item-modal');
+      const modalImage = document.getElementById('modal-image');
+      const modalName = document.getElementById('modal-name');
+      const modalDescription = document.getElementById('modal-description');
+      const modalPricesContainer = document.getElementById('modal-prices');
+      const modalCloseButton = document.getElementById('modal-close');
+
+      let selectedCategory = 'All';
+
+      function createMenuListItem(item) {
+          const listItem = document.createElement('div');
+          listItem.className = "bg-stone-800/50 border border-amber-500/10 backdrop-blur-md rounded-2xl shadow-lg transform hover:bg-stone-700/60 transition-all duration-300 ease-in-out cursor-pointer group flex items-center gap-x-4 p-3";
+          listItem.setAttribute('aria-label', `View details for ${item.name}`);
+          
+          let startingPrice;
+          if (typeof item.price === 'object') {
+              startingPrice = Object.values(item.price)[0];
+          } else {
+              startingPrice = item.price;
+          }
+
+          listItem.innerHTML = `
+              <img src="${item.image}" alt="${item.name}" class="w-24 h-24 md:w-28 md:h-28 object-cover rounded-lg flex-shrink-0 group-hover:scale-105 transition-transform duration-300" />
+              <div class="flex-grow text-left">
+                  <h3 class="text-lg md:text-xl font-bold text-white">${item.name}</h3>
+                  <p class="text-sm text-gray-400 mt-1 hidden md:block">${item.description}</p>
+              </div>
+              <div class="text-center pl-4 flex-shrink-0">
+                  <p class="text-sm text-gray-300"></p>
+                  <p class="text-lg md:text-xl font-semibold text-amber-400">EGP ${startingPrice}</p>
+              </div>
+          `;
+          listItem.addEventListener('click', () => openModal(item));
+          return listItem;
+      }
+      
+      function createCategoryHeader(category) {
+        const header = document.createElement('h2');
+        header.className = "text-3xl font-bold text-amber-400 border-b-2 border-amber-400/30 pb-2 mt-8 mb-4";
+        header.textContent = category;
+        return header;
+      }
+
+      function renderMenu(category) {
+          menuListContainer.innerHTML = '';
+          const categories = category === 'All' ? [...new Set(menuItems.map(j => j.category))] : [category];
+          
+          categories.forEach(cat => {
+              menuListContainer.appendChild(createCategoryHeader(cat));
+              menuItems.filter(j => j.category === cat).forEach(item => {
+                  menuListContainer.appendChild(createMenuListItem(item));
+              });
+          });
+      }
+
+      function updateCategoryButtons() {
+          Array.from(categoryButtonsContainer.children).forEach(button => {
+              const category = button.textContent;
+              const baseClasses = 'px-4 py-2 text-sm md:text-base font-semibold rounded-full border-2 transition-all duration-300 ease-in-out transform hover:scale-105';
+              const activeClasses = 'bg-amber-500 border-amber-400 text-stone-900 scale-110';
+              const inactiveClasses = 'bg-transparent border-gray-500 text-gray-300 hover:bg-amber-500/20 hover:border-amber-500';
+              button.className = `${baseClasses} ${selectedCategory === category ? activeClasses : inactiveClasses}`;
+          });
+      }
+
+      function renderCategoryButtons() {
+          const categories = ['All', ...new Set(menuItems.map(j => j.category))];
+          categories.forEach(category => {
+              const button = document.createElement('button');
+              button.textContent = category;
+              button.addEventListener('click', () => {
+                  selectedCategory = category;
+                  updateCategoryButtons();
+                  renderMenu(category);
+                  categoriesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              });
+              categoryButtonsContainer.appendChild(button);
+          });
+          updateCategoryButtons();
+      }
+      
+      function openModal(item) {
+          if (!modal) return;
+          modalImage.src = item.image; 
+          modalImage.alt = item.name;
+          modalName.textContent = item.name;
+          modalDescription.textContent = item.description;
+          
+          let pricesHTML = '';
+          if (typeof item.price === 'object') {
+              const priceEntries = Object.entries(item.price);
+              pricesHTML = `<div class="grid grid-cols-${priceEntries.length > 1 ? priceEntries.length : 1} gap-4 text-center rounded-lg bg-white/5 p-4">`;
+              
+              priceEntries.forEach(([size, price]) => {
+                  pricesHTML += `
+                      <div>
+                          <p class="text-lg font-bold text-gray-300 capitalize">${size}</p>
+                          <p class="text-2xl font-bold text-amber-400 mt-1">EGP ${price}</p>
+                      </div>
+                  `;
+              });
+              pricesHTML += `</div>`;
+          } else {
+              pricesHTML = `<p class="text-3xl font-bold text-center text-amber-400">EGP ${item.price}</p>`;
+          }
+          modalPricesContainer.innerHTML = pricesHTML;
+
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+      }
+
+      function closeModal() {
+          if (!modal) return;
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+      }
+
+      // Initial Render
+      renderFeaturedDishes();
+      renderCategoryButtons();
+      renderMenu(selectedCategory);
+
+      if (modal) {
+          modalCloseButton.addEventListener('click', closeModal);
+          modal.addEventListener('click', (e) => {
+              if (e.target === modal) {
+                  closeModal();
+              }
+          });
+      }
+    });
+  </script>
+</body>
 </html>
